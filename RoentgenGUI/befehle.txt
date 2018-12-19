@@ -1,0 +1,3 @@
+pyuic5 balbla.ui -o gui.py			#Gui.py erstellen aus QtDesigner
+
+pyrcc5 resource.qrc -o resource_rc.py		#Bild konvertieren
