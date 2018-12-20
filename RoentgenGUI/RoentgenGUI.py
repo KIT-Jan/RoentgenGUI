@@ -1,11 +1,12 @@
-from PyQt5 import QtWidgets
+import traceback, sys
+import time
+
+from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from Window import Ui_MainWindow
 from mcl2 import MCL2
 #from XrayTubeCommands import *
-import sys
-import time
 import os
 import json
 import numpy as np
@@ -176,9 +177,12 @@ class Gose_Irradiation(Ui_MainWindow, MCL2):
         # Execute
         self.threadpool.start(worker)
 
-    def execute(self):
-        time.sleep(3)
+    def execute(self, progress_callback):
+        print("Executing")
+        time.sleep(10)
+        print("Slept")
 
+        """
         self.setSpeed(10) #set correct speed
         self.center() #should be centered already
         print("Motor in center!")
@@ -220,7 +224,7 @@ class Gose_Irradiation(Ui_MainWindow, MCL2):
         print("Irradiation procedure finished!")
         xray.Shutdown()
 
-        self.center()
+        self.center()"""
         self.log_text.append("Execution finished")
 
     def calculate_time(self, A_tot):
@@ -241,9 +245,9 @@ def motor_speed_to_velocity(x):
 
 if __name__ == '__main__':
 
-    APP = QtWidgets.QApplication(sys.argv)
-    QtWidgets.QApplication.setStyle("Fusion")
-    PARENT = QtWidgets.QMainWindow()
+    APP = QApplication(sys.argv)
+    QApplication.setStyle("Fusion")
+    PARENT = QMainWindow()
 
     PROG = Gose_Irradiation(PARENT)
 
