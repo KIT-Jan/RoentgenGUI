@@ -6,8 +6,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from Window import Ui_MainWindow
-from mcl2 import MCL2
-#from XrayTubeCommands import *
+from mcl2 import MCL2 #python3?
+from XrayTubeCommands import *
 import os
 import json
 import numpy as np
@@ -97,19 +97,20 @@ class Gose_Irradiation(Ui_MainWindow, MCL2):
         config = read_config("irrad_config.cfg")
         self.shutter = int(config["XrayTube"]["shutter"])
         self.xray_port = config["XrayTube"]["serialport"]
+        self.xray_voltage = config["XrayTube"]["voltage"]
+        self.xray_current = config["XrayTube"]["current"]
         self.set_def_values(config)
         #self.center()      #Not useful to center the motor with cooling setup
         #self.log_text.append("Motor in center")
         self.update_button.clicked.connect(self.update)
         self.Start.clicked.connect(self.execute_fn)
 
-        """
+
         try:
-            xray = XrayTubeCommands(str(config["XrayTube"]["serialport"]))
-            shutter = int(config["XrayTube"]["shutter"])
+            self.xray = XrayTubeCommands(str(config["XrayTube"]["serialport"]))
         except:
             sys.exit("Xray tube could not be initialized!")
-		"""
+
 
         self.threadpool = QThreadPool()
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
@@ -176,13 +177,13 @@ class Gose_Irradiation(Ui_MainWindow, MCL2):
         self.log_text.append("\n5 seconds till start...\nCheck the setup again!")
         time.sleep(5)
         self.log_text.append("Scan procedure started!")
-        """
+
         #XrayTube
-        xray.setVoltage(60)
-        xray.setCurrent(30)
-        time.sleep(3)
-        xray.openShutter(self.shutter)
-        """
+        self.xray.setVoltage(self.xray_voltage)
+        self.xray.setCurrent(self.xray_current)
+        time.sleep(5)
+        self.xray.openShutter(self.shutter)
+
         initial_position = self.getPos()
         print("Initial position x: " + str(initial_position[0]) + " initial position y: " + str(initial_position[1]))
 
@@ -210,10 +211,10 @@ class Gose_Irradiation(Ui_MainWindow, MCL2):
             self.log_text.append("Scan "+ str(i+1) + " done")
             print("Time per scan: " + str(end_time-start_time) + "s")
             print("Time per scan in hours: " + str((end_time-start_time)/3600))
-        """
-        print("Irradiation procedure finished!")
-        xray.Shutdown()
-        """
+
+        print("Irradiation finished!")
+        self.xray.Shutdown()
+
         self.log_text.append("Irradiation finished")
 
     def calculate_time(self, A_tot):
