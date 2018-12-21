@@ -1,4 +1,5 @@
-import traceback, sys
+import traceback
+import sys
 import time
 
 from PyQt5.QtWidgets import *
@@ -97,8 +98,8 @@ class Gose_Irradiation(Ui_MainWindow, MCL2):
         self.shutter = int(config["XrayTube"]["shutter"])
         self.xray_port = config["XrayTube"]["serialport"]
         self.set_def_values(config)
-        self.center()
-        self.log_text.append("Motor in center")
+        #self.center()      #Not useful to center the motor with cooling setup
+        #self.log_text.append("Motor in center")
         self.update_button.clicked.connect(self.update)
         self.Start.clicked.connect(self.execute_fn)
 
@@ -110,27 +111,17 @@ class Gose_Irradiation(Ui_MainWindow, MCL2):
             sys.exit("Xray tube could not be initialized!")
 		"""
 
-        """NEW START!!!"""
         self.threadpool = QThreadPool()
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
 
     def progress_fn(self, n):
         print("%d%% done" % n)
 
-    def execute_this_fn(self, progress_callback):
-        for n in range(0, 5):
-            time.sleep(1)
-            progress_callback.emit(n*100/4)
-
-        return "Done."
-
     def print_output(self, s):
         print(s)
 
     def thread_complete(self):
-        print("THREAD COMPLETE!")
-
-    """NEW END"""
+        print("Thread complete")
 
     def set_def_values(self, config):
         self.NoS_line.setText(str(config["Irradiation"]["number_of_scans"]))
@@ -179,33 +170,31 @@ class Gose_Irradiation(Ui_MainWindow, MCL2):
 
     def execute(self, progress_callback):
         print("Executing")
-        time.sleep(10)
-        print("Slept")
 
-        """
         self.setSpeed(10) #set correct speed
-        self.center() #should be centered already
-        print("Motor in center!")
-        #input("Make sure that the alignment of the sensor is correct!\n"   + "Press Enter to continue and start irradiation procedure")
         self.move(int(self.spot_radius*1000), int(self.spot_radius*1000)) #get the beamspot on the upper left of the sensor
-        print("30 seconds till start!")
-        time.sleep(30)
-
+        self.log_text.append("\n5 seconds till start...\nCheck the setup again!")
+        time.sleep(5)
+        self.log_text.append("Scan procedure started!")
+        """
         #XrayTube
         xray.setVoltage(60)
         xray.setCurrent(30)
         time.sleep(3)
         xray.openShutter(self.shutter)
-
+        """
         initial_position = self.getPos()
         print("Initial position x: " + str(initial_position[0]) + " initial position y: " + str(initial_position[1]))
+
         xstep = int((self.sample_x + self.spot_radius*2)*1000)
         y_total = int((self.sample_y + self.spot_radius*2)*1000)
         number_of_y_steps = int(y_total/self.delta_y)
         print("number of y steps: " + str(number_of_y_steps))
 
-        for i in range(number_of_scans):
+
+        for i in range(self.number_of_scans):
             start_time = time.time()
+            self.log_text.append("Scan "+ str(i+1) + " ongoing...")
             for iy in range(0,number_of_y_steps,1):
                 if iy%2==0:
                     self.move(-xstep,0)
@@ -213,19 +202,19 @@ class Gose_Irradiation(Ui_MainWindow, MCL2):
                 elif iy%2!=0:
                     self.move(xstep,0)
                     print("Drive in positive x direction")
-                self.move(0,-delta_y) #? 1mm in y fahren
+                self.move(0,-self.delta_y) #? 1mm in y fahren
                 print("Drive delta_y upwards")
             end_time = time.time()
             self.moveAbs(initial_position[0]/4,initial_position[1]/4) #care getPos() is in self ticks
             print("Scan " + str(i) + " done!")
+            self.log_text.append("Scan "+ str(i+1) + " done")
             print("Time per scan: " + str(end_time-start_time) + "s")
             print("Time per scan in hours: " + str((end_time-start_time)/3600))
-
+        """
         print("Irradiation procedure finished!")
         xray.Shutdown()
-
-        self.center()"""
-        self.log_text.append("Execution finished")
+        """
+        self.log_text.append("Irradiation finished")
 
     def calculate_time(self, A_tot):
         A_beam = np.pi * self.spot_radius **2

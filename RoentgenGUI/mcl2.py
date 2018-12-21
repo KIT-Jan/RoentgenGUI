@@ -5,5 +5,7 @@ class MCL2():
         print("speed")
     def center(self):
         print("centered")
-    def moveAbs(x,y):
+    def moveAbs(self,x,y):
         print("moving abs")
+    def getPos(self):
+        return([0,0])

@@ -13,7 +13,7 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(901, 583)
         MainWindow.setMinimumSize(QtCore.QSize(0, 100))
-        MainWindow.setStyleSheet("QLCDNumber#time_lcd{background-color:rgb(137, 1, 37);}")
+        MainWindow.setStyleSheet("QLCDNumber#time_lcd{background-color:rgb(162, 34, 35);}")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayoutWidget_2 = QtWidgets.QWidget(self.centralwidget)
